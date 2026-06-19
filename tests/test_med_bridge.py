@@ -1,47 +1,37 @@
-from med_bridge import MedBridge, User, UserType, Data
+from med_bridge import MedBridge, EncryptionMethod, MedicalRecord
 
-def test_add_user():
+def test_upload_record():
     med_bridge = MedBridge()
-    user = User(1, "John Doe", UserType.HEALTHCARE_PROFESSIONAL)
-    med_bridge.add_user(user)
-    assert user.id in med_bridge.users
+    med_bridge.upload_record("patient1", "medical_data", EncryptionMethod.AES)
+    assert med_bridge.records["patient1"].data == "medical_data_encrypted"
 
-def test_add_data():
+def test_download_record():
     med_bridge = MedBridge()
-    data = Data(1, "Hello World")
-    med_bridge.add_data(data)
-    assert data.id in med_bridge.data
+    med_bridge.upload_record("patient1", "medical_data", EncryptionMethod.AES)
+    assert med_bridge.download_record("patient1", EncryptionMethod.AES) == "medical_data"
 
-def test_encrypt_data():
+def test_download_record_not_found():
     med_bridge = MedBridge()
-    data = Data(1, "Hello World")
-    med_bridge.add_data(data)
-    assert med_bridge.encrypt_data(1) == True
-    assert med_bridge.data[1].encrypted == True
+    try:
+        med_bridge.download_record("patient1", EncryptionMethod.AES)
+        assert False
+    except ValueError as e:
+        assert str(e) == "Patient record not found"
 
 def test_authenticate():
     med_bridge = MedBridge()
-    user = User(1, "John Doe", UserType.HEALTHCARE_PROFESSIONAL)
-    med_bridge.add_user(user)
-    assert med_bridge.authenticate(1, UserType.HEALTHCARE_PROFESSIONAL) == True
-    assert med_bridge.authenticate(2, UserType.HEALTHCARE_PROFESSIONAL) == False
+    assert med_bridge.authenticate("admin", "password", "123456") == True
 
-def test_authorize():
+def test_authenticate_invalid_credentials():
     med_bridge = MedBridge()
-    user = User(1, "John Doe", UserType.HEALTHCARE_PROFESSIONAL)
-    med_bridge.add_user(user)
-    data = Data(1, "Hello World")
-    med_bridge.add_data(data)
-    assert med_bridge.authorize(1, 1) == True
-    assert med_bridge.authorize(2, 1) == False
+    assert med_bridge.authenticate("invalid", "password", "123456") == False
 
-def test_transfer_data():
+def test_get_status():
     med_bridge = MedBridge()
-    sender = User(1, "John Doe", UserType.HEALTHCARE_PROFESSIONAL)
-    med_bridge.add_user(sender)
-    receiver = User(2, "Jane Doe", UserType.PATIENT)
-    med_bridge.add_user(receiver)
-    data = Data(1, "Hello World")
-    med_bridge.add_data(data)
-    assert med_bridge.transfer_data(1, 2, 1) == '{"data_id": 1, "receiver_id": 2}'
-    assert med_bridge.transfer_data(2, 1, 1) == None
+    med_bridge.upload_record("patient1", "medical_data", EncryptionMethod.AES)
+    assert med_bridge.get_status("patient1") == "Record uploaded successfully"
+
+def test_ensure_hipaa_compliance():
+    med_bridge = MedBridge()
+    data = "sensitive_data"
+    assert med_bridge.ensure_hipaa_compliance(data) == "redacted"

@@ -3,50 +3,54 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Dict, List
 
-class UserType(Enum):
-    HEALTHCARE_PROFESSIONAL = 1
-    PATIENT = 2
+class EncryptionMethod(Enum):
+    AES = "AES"
+    RSA = "RSA"
 
 @dataclass
-class User:
-    id: int
-    name: str
-    user_type: UserType
-
-@dataclass
-class Data:
-    id: int
-    content: str
-    encrypted: bool = False
+class MedicalRecord:
+    patient_id: str
+    data: str
 
 class MedBridge:
     def __init__(self):
-        self.users: Dict[int, User] = {}
-        self.data: Dict[int, Data] = {}
+        self.records = {}
 
-    def add_user(self, user: User):
-        self.users[user.id] = user
+    def upload_record(self, patient_id: str, data: str, encryption_method: EncryptionMethod):
+        self.records[patient_id] = MedicalRecord(patient_id, self.encrypt(data, encryption_method))
 
-    def add_data(self, data: Data):
-        self.data[data.id] = data
+    def download_record(self, patient_id: str, encryption_method: EncryptionMethod):
+        if patient_id in self.records:
+            return self.decrypt(self.records[patient_id].data, encryption_method)
+        else:
+            raise ValueError("Patient record not found")
 
-    def encrypt_data(self, data_id: int):
-        if data_id in self.data:
-            self.data[data_id].encrypted = True
-            return True
-        return False
+    def encrypt(self, data: str, encryption_method: EncryptionMethod):
+        if encryption_method == EncryptionMethod.AES:
+            # Simulate AES encryption
+            return data + "_encrypted"
+        elif encryption_method == EncryptionMethod.RSA:
+            # Simulate RSA encryption
+            return data + "_rsa_encrypted"
 
-    def authenticate(self, user_id: int, user_type: UserType):
-        if user_id in self.users and self.users[user_id].user_type == user_type:
-            return True
-        return False
+    def decrypt(self, data: str, encryption_method: EncryptionMethod):
+        if encryption_method == EncryptionMethod.AES:
+            # Simulate AES decryption
+            return data.replace("_encrypted", "")
+        elif encryption_method == EncryptionMethod.RSA:
+            # Simulate RSA decryption
+            return data.replace("_rsa_encrypted", "")
 
-    def authorize(self, user_id: int, data_id: int):
-        if user_id in self.users and data_id in self.data:
-            return True
-        return False
+    def authenticate(self, username: str, password: str, mfa_code: str):
+        # Simulate authentication
+        return username == "admin" and password == "password" and mfa_code == "123456"
 
-    def transfer_data(self, sender_id: int, receiver_id: int, data_id: int):
-        if self.authenticate(sender_id, UserType.HEALTHCARE_PROFESSIONAL) and self.authorize(receiver_id, data_id):
-            return json.dumps({"data_id": data_id, "receiver_id": receiver_id})
-        return None
+    def get_status(self, patient_id: str):
+        if patient_id in self.records:
+            return "Record uploaded successfully"
+        else:
+            return "Record not found"
+
+    def ensure_hipaa_compliance(self, data: str):
+        # Simulate HIPAA compliance check
+        return data.replace("sensitive_data", "redacted")
