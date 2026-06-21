@@ -1,16 +1,17 @@
 # Med Bridge
 
-A secure medical data transfer pipeline.
+A digital consent form management system.
 
 ## Features
 
-* End-to-end encryption for all medical data transfers
-* Secure authentication system with multi-factor authentication
-* Basic UI for uploading and downloading medical documents
-* HIPAA compliance in data handling and storage
-* Real-time status updates for file transfers
+* Create and manage digital consent forms
+* Sign consent forms electronically
+* Store consent records in an immutable blockchain layer
+* Send real-time notifications to signatories
 
 ## Usage
 
-1. Run `python -m pytest` to run the tests.
-2. Use the `MedBridge` class to upload and download medical records.
+1. Create a new consent form using the `create_consent_form` method.
+2. Sign the consent form using the `sign_consent_form` method.
+3. Get the status of the consent form using the `get_consent_form_status` method.
+4. Notify signatories using the `notify_signatories` method.

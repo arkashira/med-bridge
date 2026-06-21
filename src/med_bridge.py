@@ -1,56 +1,42 @@
 import json
 from dataclasses import dataclass
-from enum import Enum
-from typing import Dict, List
-
-class EncryptionMethod(Enum):
-    AES = "AES"
-    RSA = "RSA"
+from typing import List
 
 @dataclass
-class MedicalRecord:
+class ConsentForm:
     patient_id: str
-    data: str
+    form_id: str
+    signatories: List[str]
 
 class MedBridge:
     def __init__(self):
-        self.records = {}
+        self.consent_records = {}
+        self.blockchain = {}
 
-    def upload_record(self, patient_id: str, data: str, encryption_method: EncryptionMethod):
-        self.records[patient_id] = MedicalRecord(patient_id, self.encrypt(data, encryption_method))
+    def create_consent_form(self, patient_id: str, form_id: str, signatories: List[str]):
+        consent_form = ConsentForm(patient_id, form_id, signatories)
+        self.consent_records[form_id] = consent_form
+        return consent_form
 
-    def download_record(self, patient_id: str, encryption_method: EncryptionMethod):
-        if patient_id in self.records:
-            return self.decrypt(self.records[patient_id].data, encryption_method)
-        else:
-            raise ValueError("Patient record not found")
+    def sign_consent_form(self, form_id: str, signatory: str):
+        if form_id not in self.consent_records:
+            raise ValueError("Consent form not found")
+        consent_form = self.consent_records[form_id]
+        if signatory not in consent_form.signatories:
+            raise ValueError("Signatory not authorized")
+        self.blockchain[form_id] = json.dumps({"signatory": signatory, "timestamp": "2024-09-16T14:30:00"})
+        return self.blockchain[form_id]
 
-    def encrypt(self, data: str, encryption_method: EncryptionMethod):
-        if encryption_method == EncryptionMethod.AES:
-            # Simulate AES encryption
-            return data + "_encrypted"
-        elif encryption_method == EncryptionMethod.RSA:
-            # Simulate RSA encryption
-            return data + "_rsa_encrypted"
+    def get_consent_form_status(self, form_id: str):
+        if form_id not in self.consent_records:
+            raise ValueError("Consent form not found")
+        if form_id in self.blockchain:
+            return "signed"
+        return "pending"
 
-    def decrypt(self, data: str, encryption_method: EncryptionMethod):
-        if encryption_method == EncryptionMethod.AES:
-            # Simulate AES decryption
-            return data.replace("_encrypted", "")
-        elif encryption_method == EncryptionMethod.RSA:
-            # Simulate RSA decryption
-            return data.replace("_rsa_encrypted", "")
-
-    def authenticate(self, username: str, password: str, mfa_code: str):
-        # Simulate authentication
-        return username == "admin" and password == "password" and mfa_code == "123456"
-
-    def get_status(self, patient_id: str):
-        if patient_id in self.records:
-            return "Record uploaded successfully"
-        else:
-            return "Record not found"
-
-    def ensure_hipaa_compliance(self, data: str):
-        # Simulate HIPAA compliance check
-        return data.replace("sensitive_data", "redacted")
+    def notify_signatories(self, form_id: str):
+        if form_id not in self.consent_records:
+            raise ValueError("Consent form not found")
+        consent_form = self.consent_records[form_id]
+        for signatory in consent_form.signatories:
+            print(f"Notification sent to {signatory}")
