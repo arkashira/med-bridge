@@ -1,9 +1,14 @@
-# Secure Transfer Engine
+# Med-Bridge
 
-A Python project for secure file transfer.
+Med-Bridge is a system for managing audit-ready encryption and access controls.
+
+## Features
+
+*   Secure key management
+*   Configurable access controls
+*   Logging of all access and encryption activities
 
 ## Usage
 
-1. Install the project using `poetry install`.
-2. Run the project using `python -m secure_transfer --file-path <file_path> --connection-speed <connection_speed> --encryption-key <encryption_key>`.
-3. The project will upload the file and print the transfer log in JSON format.
+1.  Run `python -m pytest` to run the tests.
+2.  Use the `AuditReadyEncryption` class to setup audit-ready encryption and access controls.
